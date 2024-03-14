@@ -1,11 +1,14 @@
 import typer
-
-# import flet as ft
-# from app.model.configs import load_configs
-# from app.api.flet_app import FletApp
 import random
+import flet as ft
 from rda.configs.config_controller import EnvController, ConfigsController
 from rda.core.assistant import Assistant
+from rda.api.flet_app import FletApp
+from rich.prompt import Prompt
+from rich.console import Console
+
+console = Console()
+
 app = typer.Typer(no_args_is_help=True)
 
 
@@ -15,19 +18,19 @@ def chat(
         default="data/manual.pdf", help="Tell me which document I can help you with"
     ),
     cfg_path: str = typer.Argument(
-        default="rda/configs/configs.yaml", help= "Path to the config file"
-    )
+        default="rda/configs/configs.yaml", help="Path to the config file"
+    ),
 ):
     env_controller = EnvController()
     user_name = env_controller.user_name
     if not user_name:
         while not user_name:
-            user_name = typer.prompt(
+            user_name = Prompt.ask(
                 "Hello newcomer! Please enter your name to continue"
             )
         env_controller.update(user_name)
 
-    question = typer.prompt(
+    question = Prompt.ask(
         random.choice(
             [
                 f"rda: Hello {user_name}, ask me anything\nUser",
@@ -36,14 +39,24 @@ def chat(
             ]
         )
     )
-    answer = "OK"
+
     cfg = ConfigsController(cfg_path)
-    bot = Assistant(cfg.assistant, document_path=document_path, key=env_controller.api_key)
+    bot = Assistant(
+        cfg.assistant,
+        document_path=document_path,
+        key=env_controller.api_key,
+    )
 
     while True:
-        bot.get_stream_answer(question=question)
-        question = typer.prompt(
-            random.choice(["\nrda: Anything else?\nUser", "\nrda: Next questions, please!\nUser"])
+        answers = bot.get_stream_answer(question=question)
+        console.print(f'rda: ', end='', style='bright_cyan')
+        for answer in answers:
+            console.print(answer, end='', style='bright_cyan', soft_wrap=True)
+        
+        question = Prompt.ask(
+            random.choice(
+                ["\nrda: Anything else?\nUser", "\nrda: Next questions, please!\nUser"]
+            )
         )
 
 
@@ -66,14 +79,28 @@ def eval(
     # )
     ...
 
+@app.command(help="Start web app")
+def run_app(
+    document_path: str = typer.Argument(
+        default="data/manual.pdf", help="Tell me which document I can help you with"
+    ),
+    cfg_path: str = typer.Argument(
+        default="rda/configs/configs.yaml", help="Path to the config file"
+    ),
+):
+    env_controller = EnvController()
 
-# def run_app():
-#     # config_path = "app/config/config.yaml"
-#     # configs = load_configs(config_path=config_path)
+    cfg = ConfigsController(cfg_path)
 
-#     # flet_app = FletApp(
-#     #     config=configs["flet_config"],
-#     #     chatbot=chatbot,
-#     # )
-#     # ft.app(target=flet_app.run, view=ft.WEB_BROWSER, port=8080)
-#     ...
+    bot = Assistant(
+        cfg.assistant,
+        document_path=document_path,
+        key=env_controller.api_key,
+    )
+
+    flet_app = FletApp(
+        config=cfg.flet,
+        chatbot=bot,
+    )
+
+    ft.app(target=flet_app.run, view=ft.WEB_BROWSER, port=cfg.flet.port)

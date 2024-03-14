@@ -1,6 +1,3 @@
-from typing import Text, Dict, List
-from pydantic import BaseModel
-
 from pydantic import BaseModel
 from typing import Text, List, Dict, Any
 from rda.utils.timer import timer
@@ -58,29 +55,18 @@ class Assistant(BaseModel):
 
     def get_stream_answer(self, question: Text):
         message = self._create_user_message(question)
-        with self.client.beta.threads.runs.create_and_stream(
-            thread_id=self.thread_id,
-            assistant_id=self.assistant_id,
-            event_handler=EventHandler(),
-        ) as stream:
-            stream.until_done()
+
+        run = self.client.beta.threads.runs.create(
+            thread_id=self.thread_id, assistant_id=self.assistant_id, stream=True,
+        )
+
+        for chunk in run:
+            if type(chunk).__name__ != "ThreadMessageDelta":
+                continue
+            response_text = chunk.data.delta.content[0].text.value
+            if response_text: 
+                yield response_text
+
     @timer
     def predict(self, question: Text):
         self._create_user_message(question)
-
-
-class EventHandler(AssistantEventHandler):
-    @override
-    def on_text_created(self, text) -> None:
-        print(f"\nrda: ", end="", flush=True)
-
-    @override
-    def on_text_delta(self, delta, snapshot):
-        print(delta.value, end="", flush=True)
-        # yield delta.value
-
-    def on_tool_call_created(self, tool_call):
-        pass
-
-    def on_tool_call_delta(self, delta, snapshot):
-        pass

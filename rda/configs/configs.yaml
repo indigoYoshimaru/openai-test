@@ -1,7 +1,57 @@
-assistant: 
+assistant:
   model: "gpt-3.5-turbo-0125"
-  instructions: "You are an engineer assistant in the refrigeration domain. Strictly follow the information in the file to best respond to engineer queries. The response should be maximum 300 words length."
+  instructions: "You are an engineer assistant in the refrigeration domain. Strictly follow the information in the file to best respond to engineer queries. The response should be maximum 200 words length."
   tools:
     - type: retrieval
-  
-  
+flet:
+  port: 8080
+  title: RDA
+  avatar_colors:
+    [
+      ft.colors.AMBER,
+      ft.colors.BLUE,
+      ft.colors.BROWN,
+      ft.colors.CYAN,
+      ft.colors.GREEN,
+      ft.colors.INDIGO,
+      ft.colors.LIME,
+      ft.colors.ORANGE,
+      ft.colors.PINK,
+      ft.colors.PURPLE,
+      ft.colors.RED,
+      ft.colors.TEAL,
+      ft.colors.YELLOW,
+    ]
+  bot_message:
+    name: RDA
+    alignment: ft.MainAxisAlignment.START
+    size: 14
+  user_message:
+    name: { user_name }
+    alignment: ft.MainAxisAlignment.END
+    size: 14
+  chat_box:
+    hint_text: "Say something, I won't give up on you ..."
+    autofocus: True
+    shift_enter: True
+    min_lines: 1
+    max_lines: 5
+    filled: True
+    expand: True
+    border_color: ft.colors.TEAL_ACCENT
+  header:
+    value: RDA - Refrigeration Diagnostic Assistant
+    text_align: ft.TextAlign.CENTER
+    color: ft.colors.TEAL_ACCENT
+    size: 30
+    weight: ft.FontWeight.BOLD
+    font_family: Azeret Mono
+  container:
+    border: ft.border.all(1, ft.colors.TEAL_ACCENT)
+    border_radius: 5
+    padding: 30
+    expand: True
+  chat_view:
+    expand: True
+    spacing: 10
+    auto_scroll: True

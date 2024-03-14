@@ -1,11 +1,10 @@
 from pydantic import BaseModel
 from typing import Any, List, Dict, Text, Union
 import flet as ft
-from app.model.configs import FletConfig
 
 
 class Message(BaseModel):
-    text: Text
+    text: Text = ''
     user: Text
     message_type: Text
 
@@ -14,7 +13,7 @@ class ChatMessage(ft.Row):
     def __init__(
         self,
         message: Message,
-        config: Union[FletConfig, Dict],
+        config: Dict,
         avatar_colors: List,
     ):
         super().__init__()

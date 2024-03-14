@@ -1,8 +1,10 @@
 from pydantic import BaseModel
-from typing import Text, Dict
+from typing import Text, Dict, List
+import flet as ft
 import dotenv
 import os
 from loguru import logger
+
 
 
 class EnvController:
@@ -56,15 +58,52 @@ class EnvController:
         return self.__api_key
 
 
+class FletConfig(BaseModel):
+    title: Text
+    port: int
+    avatar_colors: List
+    chat_box: Dict
+    header: Dict
+    container: Dict
+    chat_view: Dict
+    bot_message: Dict
+    user_message: Dict
+
+    def __init__(self, config_dict: Dict):
+        try:
+            assert config_dict, "Empty config dictionary for Flet"
+            for k, v in config_dict.items():
+                if isinstance(v, List):
+                    config_dict[k] = [eval(x) for x in v]
+                    continue
+                if isinstance(v, Dict):
+                    for inner_k, inner_v in v.items():
+                        try:
+                            inner_v = eval(inner_v)
+                        except:
+                            continue
+                        else:
+                            v[inner_k] = inner_v
+                    config_dict[k] = v
+
+        except Exception as e:
+            raise e
+
+        else:
+            super().__init__(**config_dict)
+
+
 class ConfigsController(BaseModel):
     assistant: Dict
+    flet: FletConfig
 
     def __init__(self, config_path: Text = "rda/configs/configs.yaml"):
         from rda.utils.file_io import read_yaml
 
         try:
             cfg = read_yaml(config_path)
+            flet_cfg = FletConfig(cfg["flet"])
             assert cfg, "Empty config or invalid config path"
         except Exception as e:
             raise e
-        super().__init__(**cfg)
+        super().__init__(assistant=cfg["assistant"], flet=flet_cfg)
