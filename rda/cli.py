@@ -9,7 +9,6 @@ from rich.console import Console
 import rda
 
 APPDIR = rda.__path__[0]
-print(APPDIR)
 console = Console()
 
 app = typer.Typer(no_args_is_help=True)
