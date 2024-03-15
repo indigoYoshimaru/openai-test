@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA)"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+include = [".env", "rda/configs/configs.yaml"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -21,3 +22,6 @@ python-dotenv = "^1.0.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rda = "rda.__main__:app"
