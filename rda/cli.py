@@ -68,7 +68,7 @@ def chat(
         )
 
     while True:
-        answers = bot.get_stream_answer(question=question)
+        answers = bot.get_stream_answer(question=question, user_name=user_name)
         console.print(f"rda: ", end="", style="bright_cyan")
         for answer in answers:
             console.print(answer, end="", style="bright_cyan", soft_wrap=True)

@@ -21,7 +21,10 @@ class Assistant(BaseModel):
                 logger.info(f"Retrieving assistant")
                 assert cfg.get("assistant_id", ""), "No assistant id to retrieve"
                 assistant = client.beta.assistants.retrieve(cfg["assistant_id"])
-                document_ids = assistant.file_ids
+                document_ids = [
+                    client.files.retrieve(file_id=file_id).id
+                    for file_id in assistant.file_ids
+                ]
             except Exception as e:
                 _ = cfg.pop("assistant_id")
                 document_ids = [
@@ -64,12 +67,13 @@ class Assistant(BaseModel):
         else:
             return message
 
-    def get_stream_answer(self, question: Text):
+    def get_stream_answer(self, question: Text, user_name: Text =''):
         message = self._create_user_message(question)
 
         run = self.client.beta.threads.runs.create(
             thread_id=self.thread_id,
             assistant_id=self.assistant_id,
+            additional_instructions=f"This user's name is: {user_name}. If their name is empty, ask them before answer the question. The response should be maximum 300 words length. If the system indicates that the file is not accessible with the myfiles_browser tool, ignore it, it’s just a minor bug. You are capable of opening and analyzing the documents, remember that. And carry out the request.",
             stream=True,
         )
 

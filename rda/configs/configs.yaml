@@ -2,7 +2,7 @@ assistant:
   model: "gpt-3.5-turbo-0125"
   name: Refrigeration Diagnostic Assistant (RDA)
   assistant_id: "asst_0w7EyWe0wj1lsJkfDiV4IV1p"
-  instructions: "You are an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA). Strictly follow the information in the file to best respond to engineer queries. The response should be maximum 300 words length."
+  instructions: "You are an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA). Strictly follow the information in the PDF documents to best respond to engineer queries."
   tools:
     - type: retrieval
 flet:
