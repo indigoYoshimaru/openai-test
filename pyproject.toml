@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rda"
-version = "0.0.2"
+version = "0.0.1"
 description = "an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA)"
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
