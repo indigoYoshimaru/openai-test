@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rda"
+version = "0.1.0"
+description = "an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA)"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+typer = "0.7.0"
+flet = "0.16.0"
+rich = "^13.7.1"
+openai = "^1.14.0"
+loguru = "0.7.2"
+pydantic = "2.6.4"
+typing-extensions = "4.10.0"
+PyYAML = "6.0.1"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

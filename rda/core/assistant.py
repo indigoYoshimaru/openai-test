@@ -21,12 +21,7 @@ class Assistant(BaseModel):
                 logger.info(f"Retrieving assistant")
                 assert cfg.get("assistant_id", ""), "No assistant id to retrieve"
                 assistant = client.beta.assistants.retrieve(cfg["assistant_id"])
-                document_ids = [
-                    client.beta.assistants.files.retrieve(
-                        assistant_id=assistant.id, file_id=file_id
-                    )
-                    for file_id in assistant.file_ids
-                ]
+                document_ids = assistant.file_ids
             except Exception as e:
                 _ = cfg.pop("assistant_id")
                 document_ids = [

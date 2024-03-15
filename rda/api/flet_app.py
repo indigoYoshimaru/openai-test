@@ -2,7 +2,6 @@ from rda.configs.config_controller import FletConfig
 from rda.core.ft import Message, ChatMessage
 from rda.core.assistant import Assistant
 from pydantic import BaseModel
-from typing import Any, Text
 import flet as ft
 from loguru import logger
 
@@ -22,12 +21,6 @@ class FletApp(BaseModel):
             logger.warning(f"{type(e).__name__}: {e}")
             page.client_storage.set(page.client_ip, page.session_id)
 
-        # finally:
-        #     conversation_info = self.register_conversation(
-        #         client_ip=page.client_ip, session_id=page.session_id
-        #     )
-        #     logger.info(f"{conversation_info=}")
-
         def send_click(e):
             msg = chat_box.value
             chat_box.value = ""
@@ -46,18 +39,18 @@ class FletApp(BaseModel):
             response_chunk = self.chatbot.get_stream_answer(
                 question=msg,
             )
-        
+
             chat.controls += ChatMessage(
                 Message(
                     user=self.config.bot_message["name"],
-                    text='',
+                    text="",
                     message_type="Bot",
                 ),
                 config=self.config.bot_message,
                 avatar_colors=self.config.avatar_colors,
             ).controls
-            for response in response_chunk: 
-                chat.controls[-1].controls[-1].controls[-1].value+=response
+            for response in response_chunk:
+                chat.controls[-1].controls[-1].controls[-1].value += response
                 page.update()
 
         try:

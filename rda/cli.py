@@ -94,7 +94,11 @@ def eval(
 @app.command(help="Start web app")
 def run_app(
     document_path: str = typer.Argument(
-        default="data/manual.pdf", help="Tell me which document I can help you with"
+        default="",
+        help="Tell me which document I can help you with. Enter to overwrite the document dir.",
+    ),
+    document_dir: str = typer.Argument(
+        default="data/split", help="Directory to list of documents for reference"
     ),
     cfg_path: str = typer.Argument(
         default="rda/configs/configs.yaml", help="Path to the config file"
@@ -104,11 +108,20 @@ def run_app(
 
     cfg = ConfigsController(cfg_path)
 
-    bot = Assistant(
-        cfg.assistant,
-        document_paths=document_path,
-        key=env_controller.api_key,
-    )
+    if document_path:
+        bot = Assistant(
+            cfg.assistant,
+            document_paths=[document_path],
+            key=env_controller.api_key,
+        )
+    else: 
+        import os
+        document_paths = [os.path.join(document_dir, fname) for fname in os.listdir(document_dir)]
+        bot = Assistant(
+            cfg.assistant,
+            document_paths=document_paths,
+            key=env_controller.api_key,
+        )
 
     flet_app = FletApp(
         config=cfg.flet,
