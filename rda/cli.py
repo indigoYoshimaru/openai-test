@@ -15,7 +15,11 @@ app = typer.Typer(no_args_is_help=True)
 @app.command(help="How can I help you today?")
 def chat(
     document_path: str = typer.Argument(
-        default="data/manual.pdf", help="Tell me which document I can help you with"
+        default="",
+        help="Tell me which document I can help you with. Enter to overwrite the document dir.",
+    ),
+    document_dir: str = typer.Argument(
+        default="data/split", help="Directory to list of documents for reference"
     ),
     cfg_path: str = typer.Argument(
         default="rda/configs/configs.yaml", help="Path to the config file"
@@ -25,9 +29,7 @@ def chat(
     user_name = env_controller.user_name
     if not user_name:
         while not user_name:
-            user_name = Prompt.ask(
-                "Hello newcomer! Please enter your name to continue"
-            )
+            user_name = Prompt.ask("Hello newcomer! Please enter your name to continue")
         env_controller.update(user_name)
 
     question = Prompt.ask(
@@ -41,18 +43,27 @@ def chat(
     )
 
     cfg = ConfigsController(cfg_path)
-    bot = Assistant(
-        cfg.assistant,
-        document_path=document_path,
-        key=env_controller.api_key,
-    )
+    if document_path:
+        bot = Assistant(
+            cfg.assistant,
+            document_paths=[document_path],
+            key=env_controller.api_key,
+        )
+    else: 
+        import os
+        document_paths = [os.path.join(document_dir, fname) for fname in os.listdir(document_dir)]
+        bot = Assistant(
+            cfg.assistant,
+            document_paths=document_paths,
+            key=env_controller.api_key,
+        )
 
     while True:
         answers = bot.get_stream_answer(question=question)
-        console.print(f'rda: ', end='', style='bright_cyan')
+        console.print(f"rda: ", end="", style="bright_cyan")
         for answer in answers:
-            console.print(answer, end='', style='bright_cyan', soft_wrap=True)
-        
+            console.print(answer, end="", style="bright_cyan", soft_wrap=True)
+
         question = Prompt.ask(
             random.choice(
                 ["\nrda: Anything else?\nUser", "\nrda: Next questions, please!\nUser"]
@@ -79,6 +90,7 @@ def eval(
     # )
     ...
 
+
 @app.command(help="Start web app")
 def run_app(
     document_path: str = typer.Argument(
@@ -94,7 +106,7 @@ def run_app(
 
     bot = Assistant(
         cfg.assistant,
-        document_path=document_path,
+        document_paths=document_path,
         key=env_controller.api_key,
     )
 

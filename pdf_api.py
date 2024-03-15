@@ -9,23 +9,25 @@ assert api_key, "Empty key"
 client = OpenAI(
     api_key=api_key,
 )
-
-file = client.files.create(file=open("data/manual.pdf", "rb"), purpose="assistants")
+data_dir = 'data/split'
+file_ids = []
+for fdir in os.listdir(data_dir): 
+    file_ids.append(client.files.create(file=open(os.path.join(data_dir, fdir), "rb"), purpose="assistants").id)
 
 # Add the file to the assistant
 assistant = client.beta.assistants.create(
-    instructions="You are an engineer assistant in the refrigeration domain. Use the knowledge in the file to best respond to engineer queries. The response should be at most 300 words length.",
+    instructions="You are an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA). Strictly follow the information in the file to best respond to engineer queries. The response should be maximum 300 words length.",
     model="gpt-3.5-turbo-0125",
     tools=[{"type": "retrieval"}],
-    file_ids=[file.id],
+    file_ids=file_ids,
 )
 
 thread = client.beta.threads.create()
 message = client.beta.threads.messages.create(
     thread_id=thread.id,
     role="user",
-    content="What are preventive measures to mitigate the risk of electric shock?",
-    file_ids=[file.id],
+    content="What are the components of the compressor unit?",
+    file_ids=file_ids,
 )
 run = client.beta.threads.runs.create(
     thread_id=thread.id, assistant_id=assistant.id, stream=True
