@@ -22,7 +22,7 @@ def chat(
         default="data/split", help="Directory to list of documents for reference"
     ),
     cfg_path: str = typer.Argument(
-        default="rda/configs/configs.yaml", help="Path to the config file"
+        default="configs/configs.yaml", help="Path to the config file"
     ),
 ):
     env_controller = EnvController()
@@ -101,7 +101,7 @@ def run_app(
         default="data/split", help="Directory to list of documents for reference"
     ),
     cfg_path: str = typer.Argument(
-        default="./configs/configs.yaml", help="Path to the config file"
+        default="configs/configs.yaml", help="Path to the config file"
     ),
 ):
     env_controller = EnvController()
