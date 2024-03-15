@@ -6,7 +6,10 @@ from rda.core.assistant import Assistant
 from rda.api.flet_app import FletApp
 from rich.prompt import Prompt
 from rich.console import Console
+import rda
 
+APPDIR = rda.__path__[0]
+print(APPDIR)
 console = Console()
 
 app = typer.Typer(no_args_is_help=True)
@@ -25,7 +28,10 @@ def chat(
         default="configs/configs.yaml", help="Path to the config file"
     ),
 ):
-    env_controller = EnvController()
+    import os
+
+    global APPDIR
+    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, ".env"))
     user_name = env_controller.user_name
     if not user_name:
         while not user_name:
@@ -42,16 +48,20 @@ def chat(
         )
     )
 
-    cfg = ConfigsController(cfg_path)
+    cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
     if document_path:
         bot = Assistant(
             cfg.assistant,
-            document_paths=[document_path],
+            document_paths=[os.path.join(APPDIR, document_path)],
             key=env_controller.api_key,
         )
-    else: 
+    else:
         import os
-        document_paths = [os.path.join(document_dir, fname) for fname in os.listdir(document_dir)]
+
+        document_paths = [
+            os.path.join(APPDIR, document_dir, fname)
+            for fname in os.listdir(os.path.join(APPDIR, document_dir))
+        ]
         bot = Assistant(
             cfg.assistant,
             document_paths=document_paths,
@@ -104,19 +114,26 @@ def run_app(
         default="configs/configs.yaml", help="Path to the config file"
     ),
 ):
-    env_controller = EnvController()
+    import os
 
-    cfg = ConfigsController(cfg_path)
+    global APPDIR
+    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, ".env"))
+
+    cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
 
     if document_path:
         bot = Assistant(
             cfg.assistant,
-            document_paths=[document_path],
+            document_paths=[os.path.join(APPDIR, document_path)],
             key=env_controller.api_key,
         )
-    else: 
+    else:
         import os
-        document_paths = [os.path.join(document_dir, fname) for fname in os.listdir(document_dir)]
+
+        document_paths = [
+            os.path.join(APPDIR, document_dir, fname)
+            for fname in os.listdir(os.path.join(APPDIR, document_dir))
+        ]
         bot = Assistant(
             cfg.assistant,
             document_paths=document_paths,
