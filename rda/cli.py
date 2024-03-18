@@ -17,7 +17,7 @@ app = typer.Typer(no_args_is_help=True)
 @app.command(help="How can I help you today?")
 def chat(
     document_path: str = typer.Argument(
-        default="",
+        default="data/manual.pdf",
         help="Tell me which document I can help you with. Enter to overwrite the document dir.",
     ),
     document_dir: str = typer.Argument(
@@ -30,11 +30,11 @@ def chat(
     import os
 
     global APPDIR
-    
+
     cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
 
     env_controller = EnvController(dotenv_path=os.path.join(APPDIR, cfg.dot_env))
-    
+
     user_name = env_controller.user_name
     if not user_name:
         while not user_name:
@@ -106,7 +106,7 @@ def eval(
 @app.command(help="Start web app")
 def run_app(
     document_path: str = typer.Argument(
-        default="",
+        default="data/manual.pdf",
         help="Tell me which document I can help you with. Enter to overwrite the document dir.",
     ),
     document_dir: str = typer.Argument(
@@ -117,8 +117,9 @@ def run_app(
     ),
 ):
     import os
+
     global APPDIR
-    
+
     cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
 
     env_controller = EnvController(dotenv_path=os.path.join(APPDIR, cfg.dot_env))

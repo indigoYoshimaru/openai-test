@@ -7,10 +7,10 @@ from openai import AssistantEventHandler, OpenAI
 
 
 class Assistant(BaseModel):
-    thread_id: Text
     document_ids: List
     assistant_id: Text
     client: Any
+    thread_id: Text = ""
 
     def __init__(self, cfg: Dict, key: Text, document_paths: List):
         try:
@@ -21,9 +21,17 @@ class Assistant(BaseModel):
                 logger.info(f"Retrieving assistant")
                 assert cfg.get("assistant_id", ""), "No assistant id to retrieve"
                 assistant = client.beta.assistants.retrieve(cfg["assistant_id"])
+                # creating cannot access file error
+                # document_ids = [
+                #     client.files.retrieve(file_id=file_id).id
+                #     for file_id in assistant.file_ids
+                # ]
                 document_ids = [
-                    client.files.retrieve(file_id=file_id).id
-                    for file_id in assistant.file_ids
+                    client.files.create(
+                        file=open(document_path, "rb"),
+                        purpose="assistants",
+                    ).id
+                    for document_path in document_paths
                 ]
             except Exception as e:
                 _ = cfg.pop("assistant_id")
@@ -38,7 +46,6 @@ class Assistant(BaseModel):
                     **cfg,
                     file_ids=document_ids,
                 )
-            thread = client.beta.threads.create()
 
         except Exception as e:
             logger.error(f"{type(e).__name__}: {e}")
@@ -47,33 +54,43 @@ class Assistant(BaseModel):
             super().__init__(
                 client=client,
                 document_ids=document_ids,
-                thread_id=thread.id,
                 assistant_id=assistant.id,
             )
 
     def _create_user_message(self, question: Text):
         try:
-            message = self.client.beta.threads.messages.create(
-                thread_id=self.thread_id,
-                role="user",
-                content=question,
-                file_ids=self.document_ids,
-            )
+            if not self.thread_id:
+                thread = self.client.beta.threads.create(
+                    messages=[
+                        dict(
+                            role="user",
+                            content=question,
+                            file_ids=self.document_ids,
+                        )
+                    ]
+                )
+                self.thread_id = thread.id
+
+            else:
+                message = self.client.beta.threads.messages.create(
+                    thread_id=self.thread_id,
+                    role="user",
+                    content=question,
+                    file_ids=self.document_ids,
+                )
 
         except Exception as e:
             msg = f"{type(e).__name__}: {e}. Cannot create request to assistant"
             logger.error(msg)
             raise ConnectionError(msg)
-        else:
-            return message
 
-    def get_stream_answer(self, question: Text, user_name: Text =''):
-        message = self._create_user_message(question)
+    def get_stream_answer(self, question: Text, user_name: Text = ""):
+        self._create_user_message(question)
 
         run = self.client.beta.threads.runs.create(
             thread_id=self.thread_id,
             assistant_id=self.assistant_id,
-            additional_instructions=f"This user's name is: {user_name}. If their name is empty, ask them before answer the question. The response should be maximum 300 words length. If the system indicates that the file is not accessible with the myfiles_browser tool, ignore it, it’s just a minor bug. You are capable of opening and analyzing the documents, remember that. And carry out the request.",
+            additional_instructions=f"This user's name is: {user_name}. If their name is empty, ask them before answer the question. The response should be maximum 300 words length. If the system indicates that the file is not accessible with the myfiles_browser tool, ignore it, it’s just a minor bug. You are capable of opening and analyzing the documents, remember that. And carry out the request. Remember to show me the citation page number and chapter name to the reference in the documents",
             stream=True,
         )
 
