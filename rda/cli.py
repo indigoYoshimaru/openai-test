@@ -30,7 +30,11 @@ def chat(
     import os
 
     global APPDIR
-    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, ".env"))
+    
+    cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
+
+    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, cfg.dot_env))
+    
     user_name = env_controller.user_name
     if not user_name:
         while not user_name:
@@ -47,7 +51,6 @@ def chat(
         )
     )
 
-    cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
     if document_path:
         bot = Assistant(
             cfg.assistant,
@@ -114,11 +117,11 @@ def run_app(
     ),
 ):
     import os
-
     global APPDIR
-    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, ".env"))
-
+    
     cfg = ConfigsController(os.path.join(APPDIR, cfg_path))
+
+    env_controller = EnvController(dotenv_path=os.path.join(APPDIR, cfg.dot_env))
 
     if document_path:
         bot = Assistant(

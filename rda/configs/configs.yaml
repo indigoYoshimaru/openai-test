@@ -5,6 +5,7 @@ assistant:
   instructions: "You are an engineer assistant in the refrigeration domain named Refrigeration Diagnostic Assistant (RDA). Strictly follow the information in the PDF documents to best respond to engineer queries."
   tools:
     - type: retrieval
+dot_env: .env
 flet:
   port: 8080
   title: RDA

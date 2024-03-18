@@ -6,7 +6,6 @@ import os
 from loguru import logger
 
 
-
 class EnvController:
     __api_key: Text
     __dotenv_path: Text = ""
@@ -96,6 +95,7 @@ class FletConfig(BaseModel):
 class ConfigsController(BaseModel):
     assistant: Dict
     flet: FletConfig
+    dot_env: Text
 
     def __init__(self, config_path: Text = "rda/configs/configs.yaml"):
         from rda.utils.file_io import read_yaml
@@ -106,4 +106,8 @@ class ConfigsController(BaseModel):
             assert cfg, "Empty config or invalid config path"
         except Exception as e:
             raise e
-        super().__init__(assistant=cfg["assistant"], flet=flet_cfg)
+        super().__init__(
+            assistant=cfg["assistant"],
+            flet=flet_cfg,
+            dot_env=cfg["dot_env"],
+        )
